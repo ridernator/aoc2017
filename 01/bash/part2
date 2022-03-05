@@ -1,0 +1,27 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    local longNum="$(cat "$INPUT")"
+
+    local sum=0
+
+    # For each number in string
+    for ((i=0; i<${#longNum}; ++i)); do
+        # Calculate other position by adding on half string width and wrapping
+        local otherPos=$((i + (${#longNum} / 2)))
+        ((otherPos %= ${#longNum}))
+
+        # If number match then add number to sum
+        if test ${longNum:$i:1} = ${longNum:$otherPos:1}; then
+            ((sum += ${longNum:$i:1}))
+        fi
+    done
+
+    echo "Result is $sum"
+}
+
+
+main "$@"
+
