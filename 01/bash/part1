@@ -7,15 +7,15 @@ main() {
 
     local sum=0
 
-    if test ${longNum:0:1} = ${longNum:$((${#longNum} - 1))}; then
-        ((sum += ${longNum:0:1}))
-    fi
-
+    # For each number in string
     for ((i=0; i<${#longNum}; ++i)); do
-        if test $i -lt $((${#longNum} - 1)); then
-            if test ${longNum:$i:1} = ${longNum:$((i + 1)):1}; then
-                ((sum += ${longNum:$i:1}))
-            fi
+        # Calculate other position by adding 1 to it and wrapping
+        local otherPos=$((i + 1))
+        ((otherPos %= ${#longNum}))
+
+        # If number match then add number to sum
+        if test ${longNum:$i:1} = ${longNum:$otherPos:1}; then
+            ((sum += ${longNum:$i:1}))
         fi
     done
 
