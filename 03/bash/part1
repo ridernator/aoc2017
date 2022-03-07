@@ -1,0 +1,76 @@
+#!/bin/bash
+
+main() {
+    local -ri INPUT=325489
+
+    # Store NS and EW location
+    local -i ns=0
+    local -i ew=0
+
+    # Initial direction is east
+    local direction='E'
+
+    # Initially travel 1 square before rotating left
+    local -i size=1
+    local -i sizeCount=0
+
+    # For each square up to the one we want
+    for (( i=1; i<$INPUT; ++i )); do
+        # If it is time to rotate left
+        if test $sizeCount -eq $size; then
+            # Reset counter
+            sizeCount=0
+
+            # Increment size to next rotation if we are going north or south
+            if test "$direction" = "N" -o \
+                    "$direction" = "S"; then
+                (( ++size ))
+            fi
+
+            # Rotate left
+            case $direction in
+                'N')
+                    direction='W'
+                ;;
+
+                'S')
+                    direction='E'
+                ;;
+
+                'E')
+                    direction='N'
+                ;;
+
+                'W')
+                    direction='S'
+                ;;
+            esac
+        fi
+
+        # Increment distance
+        case $direction in
+            'N')
+                (( ++ns ))
+            ;;
+
+            'S')
+                (( --ns ))
+            ;;
+
+            'E')
+                (( ++ew ))
+            ;;
+
+            'W')
+                (( --ew ))
+            ;;
+        esac
+
+        (( ++sizeCount ))
+    done
+
+    echo "Distance is ${ns}N + ${ew}E = $(( ${ns#-} + ${ew#-} ))"
+}
+
+
+main "$@"

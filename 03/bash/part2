@@ -1,0 +1,94 @@
+#!/bin/bash
+
+main() {
+    local -ri INPUT=325489
+
+    # Store NS and EW location
+    local -i ns=0
+    local -i ew=0
+
+    # Initial direction is east
+    local direction='E'
+
+    # Initially travel 1 square before rotating left
+    local -i size=1
+    local -i sizeCount=0
+
+    local -A grid=( [0,0]=1 )
+
+    # Until we get a number higher than INPUT as the result
+    while test ${grid[${ns},${ew}]} -lt $INPUT; do
+        # If it is time to rotate left
+        if test $sizeCount -eq $size; then
+            # Reset counter
+            sizeCount=0
+
+            # Increment size to next rotation if we are going north or south
+            if test "$direction" = "N" -o \
+                    "$direction" = "S"; then
+                (( ++size ))
+            fi
+
+            # Rotate left
+            case $direction in
+                'N')
+                    direction='W'
+                ;;
+
+                'S')
+                    direction='E'
+                ;;
+
+                'E')
+                    direction='N'
+                ;;
+
+                'W')
+                    direction='S'
+                ;;
+            esac
+        fi
+
+        # Increment distance
+        case $direction in
+            'N')
+                (( ++ns ))
+            ;;
+
+            'S')
+                (( --ns ))
+            ;;
+
+            'E')
+                (( ++ew ))
+            ;;
+
+            'W')
+                (( --ew ))
+            ;;
+        esac
+
+        (( ++sizeCount ))
+
+        # Calculate value to go in square
+        local value=0
+        (( value += grid[$(( ns - 1 )),$(( ew - 1 ))] ))
+        (( value += grid[$(( ns - 1 )),${ew}] ))
+        (( value += grid[$(( ns - 1 )),$(( ew + 1 ))] ))
+        (( value += grid[${ns},$(( ew - 1 ))] ))
+        (( value += grid[${ns},$(( ew + 1 ))] ))
+        (( value += grid[$(( ns + 1 )),$(( ew - 1 ))] ))
+        (( value += grid[$(( ns + 1 )),${ew}] ))
+        (( value += grid[$(( ns + 1 )),$(( ew + 1 ))] ))
+
+        # Store value in our associative array
+        grid[${ns},${ew}]=$value
+
+        #echo "Value at ${ns},${ew} = $value"
+    done
+
+    echo "First value greater than $INPUT is $value at ${ns},${ew}"
+}
+
+
+main "$@"
