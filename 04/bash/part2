@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Sort a word alphabetically
+sortWord() {
+    local word="$1"
+
+    for (( i=0; i < ${#word}; ++i )); do
+        echo "${word:$i:1}"
+    done | sort | tr -d '\n'
+}
+
+# Compare two words to see if they are anagrams of each other
+compareWords() {
+    local word1="$(sortWord $1)"
+    local word2="$(sortWord $2)"
+
+    test "$word1" = "$word2"
+}
+
 main() {
     local -r INPUT="../data/input"
 
@@ -11,10 +28,10 @@ main() {
         local -a words=( $line )
         local -i valid=1
 
-        # Search for duplicate words
+        # Search for matching words
         for (( i=0; i < $(( ${#words[@]} - 1 )); ++i )); do
             for (( j=(( i + 1 )); j < ${#words[@]}; ++j )); do
-                if test "${words[i]}" = "${words[j]}"; then
+                if compareWords "${words[i]}" "${words[j]}"; then
                     valid=0
                     echo "$line : Not valid : ${words[i]} = ${words[j]}"
 
@@ -35,4 +52,3 @@ main() {
 
 
 main "$@"
-
