@@ -1,0 +1,38 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    local -i numValid=0
+
+    # For each line
+    while read line; do
+        # Convert line to array of words
+        local -a words=( $line )
+        local -i valid=1
+
+        # Search for duplicate words
+        for (( i=0; i < $(( ${#words[@]} - 1 )); ++i )); do
+            for (( j=(( i + 1 )); j < ${#words[@]}; ++j )); do
+                if test "${words[i]}" = "${words[j]}"; then
+                    valid=0
+                    echo $line : Not valid : "${words[i]}" = "${words[j]}"
+
+                    break 2
+                fi
+            done
+        done
+
+        (( numValid += valid ))
+
+        if test $valid -eq 1; then
+            echo "$line : Valid"
+        fi
+    done < "$INPUT"
+
+    echo "Number of valid passphrases is $numValid"
+}
+
+
+main "$@"
+
