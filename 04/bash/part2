@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Sort a word alphabetically
+sortWord() {
+    local word="$1"
+
+    for (( i=0; i < ${#word}; ++i )); do
+        echo "${word:$i:1}"
+    done | sort | tr -d '\n'
+}
+
+# Compare two words to see if they are anagrams of each other
+compareWords() {
+    local word1="$(sortWord $1)"
+    local word2="$(sortWord $2)"
+
+    test "$word1" = "$word2"
+}
+
+main() {
+    local -r INPUT="../data/input"
+
+    local -i numValid=0
+
+    # For each line
+    while read line; do
+        # Convert line to array of words
+        local -a words=( $line )
+        local -i valid=1
+
+        # Search for matching words
+        for (( i=0; i < $(( ${#words[@]} - 1 )); ++i )); do
+            for (( j=(( i + 1 )); j < ${#words[@]}; ++j )); do
+                if compareWords "${words[i]}" "${words[j]}"; then
+                    valid=0
+                    echo "$line : Not valid : ${words[i]} = ${words[j]}"
+
+                    break 2
+                fi
+            done
+        done
+
+        (( numValid += valid ))
+
+        if test $valid -eq 1; then
+            echo "$line : Valid"
+        fi
+    done < "$INPUT"
+
+    echo "Number of valid passphrases is $numValid"
+}
+
+
+main "$@"
