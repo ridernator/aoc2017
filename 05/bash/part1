@@ -1,0 +1,26 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    declare -a program=( $(cat "$INPUT" | tr '\n' ' ') )
+
+    local -i index=0    
+    local -i stepCount=0
+
+    # While we are not out of bounds
+    while test $index -ge 0 -a \
+               $index -lt ${#program[@]}; do
+        # Do jump and increment number
+        (( index += program[$index]++ ))
+
+        # Increment step count
+        (( ++stepCount ))
+    done
+
+    echo "Took $stepCount steps to exit program"
+}
+
+
+main "$@"
+
