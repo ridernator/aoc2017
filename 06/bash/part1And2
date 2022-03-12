@@ -1,0 +1,54 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    local -a states
+
+    # Read first bank from file
+    states[0]=$(cat "$INPUT" | tr '\t' ' ' | tr -s ' ')
+    echo "State 0 = ${states[0]}"
+
+    local -i index=0
+
+    # Foreve
+    while true; do
+        # Convert state to array
+        banks=( ${states[$index]} )
+
+        # Find max bank
+        local -i maxIndex=0
+        for (( bankIndex=0; bankIndex<${#banks[@]}; ++bankIndex )); do
+            if test ${banks[$bankIndex]} -gt ${banks[$maxIndex]}; then
+                maxIndex=$bankIndex
+            fi
+        done
+
+        # Calculate amount to spread around
+        local -i spreadAmount=${banks[$maxIndex]}
+        banks[$maxIndex]=0
+
+        # Spread the value around
+        local -i spreadIndex=0
+        while test $(( spreadAmount-- )) -gt 0; do
+            (( ++banks[$(( (maxIndex + ++spreadIndex) % ${#banks[@]}))] ))
+        done
+        
+        # Save state
+        states[$(( ++index ))]=${banks[@]};
+        echo "State $index = ${states[$index]}"
+
+        # Test if this is a repeated state
+        for (( stateIndex=0; stateIndex<$(( ${#states[@]} - 1 )); ++stateIndex )); do
+            if test "${states[$stateIndex]}" = "${states[$index]}"; then
+                break 2
+            fi
+        done
+    done
+
+    echo "Took $index steps to repeat : \"${states[$index]}\" at position $stateIndex and $index (distance $(( index - stateIndex ))"
+}
+
+
+main "$@"
+
