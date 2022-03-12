@@ -1,0 +1,38 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    local -A programCounts
+
+    # Read each line of input
+    while read line; do
+        # Get program from start of line
+        local program="$(echo "$line" | cut -d' ' -f1)"
+
+        (( ++programCounts[$program] ))
+
+        # Get remaining program names
+        if [[ $line =~ -\> ]]; then
+            extra="$(echo "$line" | cut -d'>' -f2)"
+
+            for program in $(echo "$extra" | tr ',' ' '); do
+                (( ++programCounts[$program] ))
+            done
+        fi
+    done < "$INPUT"
+
+    # The program which appears only once in the list is at the bottom
+    for program in ${!programCounts[@]}; do
+        if test ${programCounts[$program]} -eq 1; then
+            echo "Program at bottom of tower is $program"
+
+            break
+        fi
+    done
+
+}
+
+
+main "$@"
+
