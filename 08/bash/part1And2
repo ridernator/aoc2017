@@ -1,0 +1,82 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    local largestValueEverHeld=-999999
+
+    local -A registers=( [dummyRegister]=$largestValueEverHeld )
+
+    # Read each line of the program
+    while read instruction; do
+        # Load all arguments
+        operand=$(echo $instruction | cut -d' ' -f5)
+        testNum=$(echo $instruction | cut -d' ' -f7)
+        operation=$(echo $instruction | cut -d' ' -f6)
+
+        register=$(echo $instruction | cut -d' ' -f1)
+        incBy=$(echo $instruction | cut -d' ' -f3)
+
+        # Flip value to increment by if we are decrementing
+        if test "$(echo $instruction | cut -d' ' -f2)" = "dec"; then
+            (( incBy *= -1 ))
+        fi
+
+        # Create registers if needed
+        if test -z "${registers[$operand]}"; then
+            registers[$operand]=0
+        fi
+
+        if test -z "${registers[$register]}"; then
+            registers[$register]=0
+        fi
+
+        # Perform increment if test is true
+        if test "$operation" = "=="; then
+            if test "${registers[$operand]}" -eq $testNum; then
+                (( registers[$register] += $incBy ))
+            fi
+        elif test "$operation" = ">"; then
+            if test "${registers[$operand]}" -gt $testNum; then
+                (( registers[$register] += $incBy ))
+            fi
+        elif test "$operation" = "<"; then
+            if test "${registers[$operand]}" -lt $testNum; then
+                (( registers[$register] += $incBy ))
+            fi
+        elif test "$operation" = ">="; then
+            if test "${registers[$operand]}" -ge $testNum; then
+                (( registers[$register] += $incBy ))
+            fi
+        elif test "$operation" = "<="; then
+            if test "${registers[$operand]}" -le $testNum; then
+                (( registers[$register] += $incBy ))
+            fi
+        elif test "$operation" = "!="; then
+            if test "${registers[$operand]}" -ne $testNum; then
+                (( registers[$register] += $incBy ))
+            fi
+        else
+            echo "Unknown operation \"$operation\""
+        fi        
+
+        # Calculate largest register values
+        largestRegister=dummyRegister
+        for register in ${!registers[@]}; do
+            if test ${registers[$register]} -gt ${registers[$largestRegister]}; then
+                largestRegister=$register
+            fi
+        done
+
+        if test ${registers[$largestRegister]} -gt $largestValueEverHeld; then
+            largestValueEverHeld=${registers[$largestRegister]}
+        fi
+    done < "$INPUT"
+
+    echo "Largest register at the end is $largestRegister with a value of ${registers[$largestRegister]}"
+    echo "Largest value held in any register over the course of the program was $largestValueEverHeld"
+}
+
+
+main "$@"
+
