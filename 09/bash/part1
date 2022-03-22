@@ -1,0 +1,52 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    while read line; do
+        #echo "Line before simplification : $line"
+
+        # Get rid of '!' and chars following '!'
+        for ((index=0; index<${#line}; ++index)); do
+            if test "${line:$index:1}" = '!'; then
+                line="${line:0:$index} ${line:$(( index + 2 ))}"
+            fi
+        done
+        #echo -e "\tLine after ! removal : $line"
+
+        # Get rid of sequences between < and >
+        for ((index=0; index<${#line}; ++index)); do
+            if test "${line:$index:1}" = '<'; then
+                local -i jndex=$index
+                while test "${line:$(( ++jndex )):1}" != '>'; do
+                    :
+                done
+                line="${line:0:$index} ${line:$(( jndex + 1))}"
+            fi
+        done
+        #echo -e "\tLine after <> removal : $line"
+
+        # Trim string
+        line="$(echo $line | tr -d " ,")"
+        #echo -e "\tLine after trimming : $line"
+
+        #echo "Line after simplification : $line"
+
+        # Parse groups and count
+        local -i depth=0
+        local -i score=0
+
+        for ((index=0; index<${#line}; ++index)); do
+            if test "${line:$index:1}" = '{'; then
+                (( score += ++depth ))
+            else
+                (( --depth ))
+            fi
+        done
+
+        echo "Score = $score"
+    done < "$INPUT"
+}
+
+main "$@"
+
