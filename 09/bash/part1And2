@@ -11,10 +11,12 @@ main() {
             if test "${line:$index:1}" = '!'; then
                 line="${line:0:$index} ${line:$(( index + 2 ))}"
             fi
-        done
+        done        
+        line="$(echo $line | tr -d " ")"
         #echo -e "\tLine after ! removal : $line"
 
         # Get rid of sequences between < and >
+        local -i garbageRemoved=0
         for ((index=0; index<${#line}; ++index)); do
             if test "${line:$index:1}" = '<'; then
                 local -i jndex=$index
@@ -22,13 +24,13 @@ main() {
                     :
                 done
                 line="${line:0:$index} ${line:$(( jndex + 1))}"
+
+                # Update count of garbage chars removed
+                (( garbageRemoved += ((jndex - 1) - index) ))
             fi
         done
+        line="$(echo $line | tr -d " ")"
         #echo -e "\tLine after <> removal : $line"
-
-        # Trim string
-        line="$(echo $line | tr -d " ,")"
-        #echo -e "\tLine after trimming : $line"
 
         #echo "Line after simplification : $line"
 
@@ -39,12 +41,12 @@ main() {
         for ((index=0; index<${#line}; ++index)); do
             if test "${line:$index:1}" = '{'; then
                 (( score += ++depth ))
-            else
+            elif test "${line:$index:1}" = '}'; then
                 (( --depth ))
             fi
         done
 
-        echo "Score = $score"
+        echo "Score = $score, garbageRemoved = $garbageRemoved"
     done < "$INPUT"
 }
 
