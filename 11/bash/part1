@@ -1,0 +1,85 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    # Read each line of the program
+    while read line; do
+        # Convert steps to array
+        local -a steps=( $(echo "$line" | tr ',' ' ') )
+
+        local -i x=0
+        local -i y=0
+
+        # Perform eeach step to find endpoint
+        for step in "${steps[@]}"; do
+            case $step in
+                "n")
+                    (( y -= 2 ))
+                ;;
+
+                "s")
+                    (( y += 2 ))
+                ;;
+
+                "ne")
+                    (( ++x ))
+                    (( --y ))
+                ;;
+
+                "nw")
+                    (( --x ))
+                    (( --y ))
+                ;;
+
+                "se")
+                    (( ++x ))
+                    (( ++y ))
+                ;;
+
+                "sw")
+                    (( --x ))
+                    (( ++y ))
+                ;;
+            esac
+        done
+
+        echo "Endpoint is ($x, $y)"
+
+        local -i stepCount=0
+
+        # Calculate number of steps to get to correct column
+        while test $x -ne 0; do
+            if test $x -lt 0; then
+                (( ++x ))
+            else
+                (( --x ))
+            fi
+
+            if test $y -le 0; then
+                (( ++y ))
+            else
+                (( --y ))
+            fi
+
+            (( ++stepCount ))
+        done
+
+        # Add on steps to get to correct row
+        while test $y -ne 0; do
+            if test $y -lt 0; then
+                (( y += 2 ))
+            else
+                (( y -= 2 ))
+            fi
+
+            (( ++stepCount ))
+        done
+
+        echo "Number of steps to reach process : $stepCount"
+    done < "$INPUT"
+}
+
+
+main "$@"
+
