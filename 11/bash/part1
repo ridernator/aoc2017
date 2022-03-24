@@ -11,7 +11,7 @@ main() {
         local -i x=0
         local -i y=0
 
-        # Perform eeach step to find endpoint
+        # Perform each step to find endpoint
         for step in "${steps[@]}"; do
             case $step in
                 "n")

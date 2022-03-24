@@ -1,0 +1,95 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    # Read each line of the program
+    while read line; do
+        # Convert steps to array
+        local -a steps=( $(echo "$line" | tr ',' ' ') )
+
+        local -i x=0
+        local -i y=0
+
+        local -i maxDistance=0
+
+        # Perform each step to find endpoint
+        for step in "${steps[@]}"; do
+            case $step in
+                "n")
+                    (( y -= 2 ))
+                ;;
+
+                "s")
+                    (( y += 2 ))
+                ;;
+
+                "ne")
+                    (( ++x ))
+                    (( --y ))
+                ;;
+
+                "nw")
+                    (( --x ))
+                    (( --y ))
+                ;;
+
+                "se")
+                    (( ++x ))
+                    (( ++y ))
+                ;;
+
+                "sw")
+                    (( --x ))
+                    (( ++y ))
+                ;;
+            esac
+
+            # Calculate number of steps distant
+            local -i xCopy=$x
+            local -i yCopy=$y
+
+            local -i distance=0
+
+            # Calculate number of steps to get to correct column
+            while test $xCopy -ne 0; do
+                if test $xCopy -lt 0; then
+                    (( ++xCopy ))
+                else
+                    (( --xCopy ))
+                fi
+
+                if test $yCopy -le 0; then
+                    (( ++yCopy ))
+                else
+                    (( --yCopy ))
+                fi
+
+                (( ++distance ))
+            done
+
+            # Add on steps to get to correct row
+            while test $yCopy -ne 0; do
+                if test $yCopy -lt 0; then
+                    (( yCopy += 2 ))
+                else
+                    (( yCopy -= 2 ))
+                fi
+
+                (( ++distance ))
+            done
+
+            if test $distance -gt $maxDistance; then
+                maxDistance=$distance
+            fi
+
+            echo "Curent position is ($x, $y). Distance is $distance. Max distance is $maxDistance"
+        done
+
+        echo "Maximum distance was $maxDistance"
+    done < "$INPUT"
+}
+
+
+main "$@"
+
