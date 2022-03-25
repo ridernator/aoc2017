@@ -1,0 +1,56 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    local -A connections;
+
+    # Read each line
+    echo "Parsing list..."
+    while read line; do
+        # Get source number
+        local -i source=$(echo $line | cut -d' ' -f1)
+        local destinations="$(echo $line | cut -d'>' -f2 | tr -d ',')"
+
+        # Remove starting space
+        destinations=${destinations:1}
+
+        # Add connection to list
+        connections[$source]="$destinations"
+    done < "$INPUT"
+
+    local -a zeroGroup=( 0 )
+    local -i index=0
+
+    # Build of list of programs connected to program 0
+
+    # While we haven't reached the end of the group
+    while test $index -ne ${#zeroGroup[@]}; do
+        # Look up program in list and loop through connections
+        for programNumber in ${connections[${zeroGroup[$index]}]}; do
+            # Check if this program number is not in the list
+            local found=0
+            for i in ${zeroGroup[@]}; do
+                if test $i -eq $programNumber; then
+                    found=1
+
+                    break
+                fi
+            done
+
+            # If it isn't then add it (zeroGroup increases in size)
+            if test $found -eq 0; then
+                zeroGroup[${#zeroGroup[@]}]=$programNumber
+                echo "Adding $programNumber to list"
+            fi
+        done
+
+        (( ++index ))
+    done
+
+    echo "Number of programs in group is ${#zeroGroup[@]}"
+}
+
+
+main "$@"
+
