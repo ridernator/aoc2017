@@ -1,0 +1,68 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+    local -A ranges
+    local -A currentRanges
+    local -A incrementor
+    local -i maxDepth=0
+
+    # Read each line
+    while read line; do
+        # Grab depth and range values from line
+        local -i depth=$(echo $line | cut -d':' -f1)
+        local -i range=$(echo $line | cut -d' ' -f2)
+
+        # Add value to rules
+        ranges[$depth]=$range
+
+        # Set current value
+        currentRanges[$depth]=0
+
+        # Start by going downwards
+        incrementor[$depth]=1
+
+        # Find max depth
+        if test $depth -gt $maxDepth; then
+            maxDepth=$depth
+        fi
+    done < "$INPUT"
+
+    local -i severity=0
+
+    # Do each move. Player goes first
+    for (( depth=0; depth<=maxDepth; ++depth )); do
+        # Player move
+        echo "Player moves to depth $depth"
+        # If there is a scanner at this depth
+        if test -n "${currentRanges[$depth]}"; then
+            # If we have hit the scanner
+            if test ${currentRanges[$depth]} -eq 0; then
+                # Add on severity
+                (( severity += (depth * ranges[$depth]) ))
+                echo -e "\tDetection at depth $depth. Severity increases by ($depth * ${ranges[$depth]})=$(( depth * ranges[$depth] )) to $severity"
+            fi
+        fi
+
+        # Firewall move
+        for scannerDepth in ${!currentRanges[@]}; do
+            # Increment each scanner
+            (( currentRanges[$scannerDepth] += incrementor[$scannerDepth] ))
+
+            # If scanner hit top then reverse incrementor
+            if test ${currentRanges[$scannerDepth]} -eq -1; then
+                currentRanges[$scannerDepth]=1
+                incrementor[$scannerDepth]=1                
+            # If scanner hit bottom then reverse incrementor
+            elif test ${currentRanges[$scannerDepth]} -eq ${ranges[$scannerDepth]}; then
+                currentRanges[$scannerDepth]=$(( ranges[$scannerDepth] - 2 ))
+                incrementor[$scannerDepth]=-1
+            fi
+        done
+    done
+
+    echo "Total severity is $severity"
+}
+
+
+main "$@"
