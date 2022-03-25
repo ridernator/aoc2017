@@ -24,7 +24,7 @@ main() {
 
     # Build of list of programs connected to program 0
 
-    # While we haven;t reached the end of the group
+    # While we haven't reached the end of the group
     while test $index -ne ${#zeroGroup[@]}; do
         # Look up program in list and loop through connections
         for programNumber in ${connections[${zeroGroup[$index]}]}; do
