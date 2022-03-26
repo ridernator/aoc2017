@@ -1,0 +1,64 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    # Read in steps
+    local -a steps=( $(cat "$INPUT" | tr ',' ' ') )
+
+    # Initialise programs
+    local programs="abcdefghijklmnop"
+
+    echo -e "Program :\t$programs"
+
+    # Do each step
+    for step in ${steps[@]}; do
+        case ${step:0:1} in
+            # Spin
+            's')
+                local -i spin=${step:1}
+                programs="${programs:$(( ${#programs} - spin ))}${programs:0:$(( ${#programs} - spin ))}"
+            ;;
+
+            # Exchange at index
+            'x')
+                local -i tempA=$(echo $step | cut -d'/' -f1 | cut -d'x' -f2)
+                local -i tempB=$(echo $step | cut -d'/' -f2)
+
+                if test $tempA -gt $tempB; then
+                    local -i p1=$tempB
+                    local -i p2=$tempA
+                else
+                    local -i p1=$tempA
+                    local -i p2=$tempB
+                fi
+
+                programs=${programs:0:$p1}${programs:$p2:1}${programs:$(( p1 + 1 )):$(( p2 - (p1 + 1) ))}${programs:$p1:1}${programs:$(( p2 + 1 ))}
+            ;;
+
+            # Exchange objects
+            'p')
+                local tokenA=${step:1:1}
+                local tokenB=$(echo $step | cut -d'/' -f2)
+                local -i tempA=$(echo $programs | grep -b -o $tokenA | cut -d':' -f1)
+                local -i tempB=$(echo $programs | grep -b -o $tokenB | cut -d':' -f1)
+
+                if test $tempA -gt $tempB; then
+                    local -i p1=$tempB
+                    local -i p2=$tempA
+                else
+                    local -i p1=$tempA
+                    local -i p2=$tempB
+                fi
+
+                programs=${programs:0:$p1}${programs:$p2:1}${programs:$(( p1 + 1 )):$(( p2 - (p1 + 1) ))}${programs:$p1:1}${programs:$(( p2 + 1 ))}
+            ;;
+        esac
+
+        echo -e "After $step :\t$programs"
+    done
+}
+
+
+main "$@"
+
