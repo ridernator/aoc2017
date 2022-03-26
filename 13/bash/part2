@@ -1,0 +1,76 @@
+#!/bin/bash
+
+main() {
+    local -r INPUT="../data/input"
+
+    local -i delay=856000
+    local -A ranges
+    local -A currentRanges
+    local -i maxDepth=0
+
+    # Read each line
+    while read line; do
+        # Grab depth and range values from line
+        local -i depth=$(echo $line | cut -d':' -f1)
+        local -i range=$(echo $line | cut -d' ' -f2)
+
+        # Add value to rules
+        ranges[$depth]=$range
+
+        currentRanges[$depth]=0
+
+        # Find max depth
+        if test $depth -gt $maxDepth; then
+            maxDepth=$depth
+        fi
+    done < "$INPUT"
+
+    while true; do
+        # Firewall moves before start
+        for scannerDepth in ${!currentRanges[@]}; do
+            range=${ranges[$scannerDepth]}
+            pos=$(( (delay % (2 * (range - 1))) ))
+
+            if test $pos -ge $range; then
+                (( pos -= (2 * (pos - (range - 1))) ))
+            fi
+
+            currentRanges[$scannerDepth]=$pos
+        done
+
+        # Do each move. Player goes first
+        for (( depth=0; depth<=maxDepth; ++depth )); do
+            # Player move
+            # If there is a scanner at this depth
+            if test -n "${currentRanges[$depth]}"; then
+                # If we have hit the scanner then exit early and try again
+                if test ${currentRanges[$depth]} -eq 0; then
+                    if test $(( delay % 1000 )) -eq 0; then
+                        echo "Delaying by $delay picoseconds causes detection at depth $depth"
+                    fi
+
+                    (( ++delay ))
+                    continue 2
+                fi
+            fi
+
+            # Firewall move
+            for scannerDepth in ${!currentRanges[@]}; do
+                range=${ranges[$scannerDepth]}
+                pos=$(( ((delay + depth) % (2 * (range - 1))) + 1 ))
+
+                if test $pos -ge $range; then
+                    (( pos -= (2 * (pos - (range - 1))) ))
+                fi
+
+                currentRanges[$scannerDepth]=$pos
+            done
+        done
+
+        echo "Delaying by $delay picoseconds causes no detections"
+
+        break
+    done
+}
+
+main "$@"
