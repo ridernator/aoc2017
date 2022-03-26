@@ -4,7 +4,6 @@ main() {
     local -r INPUT="../data/input"
     local -A ranges
     local -A currentRanges
-    local -A incrementor
     local -i maxDepth=0
 
     # Read each line
@@ -18,9 +17,6 @@ main() {
 
         # Set current value
         currentRanges[$depth]=0
-
-        # Start by going downwards
-        incrementor[$depth]=1
 
         # Find max depth
         if test $depth -gt $maxDepth; then
@@ -46,18 +42,13 @@ main() {
 
         # Firewall move
         for scannerDepth in ${!currentRanges[@]}; do
-            # Increment each scanner
-            (( currentRanges[$scannerDepth] += incrementor[$scannerDepth] ))
+            pos=$(( (depth % (2 * (ranges[$scannerDepth] - 1))) + 1 ))
 
-            # If scanner hit top then reverse incrementor
-            if test ${currentRanges[$scannerDepth]} -eq -1; then
-                currentRanges[$scannerDepth]=1
-                incrementor[$scannerDepth]=1                
-            # If scanner hit bottom then reverse incrementor
-            elif test ${currentRanges[$scannerDepth]} -eq ${ranges[$scannerDepth]}; then
-                currentRanges[$scannerDepth]=$(( ranges[$scannerDepth] - 2 ))
-                incrementor[$scannerDepth]=-1
+            if test $pos -ge ${ranges[$scannerDepth]}; then
+                (( pos -= (2 * (pos - (ranges[$scannerDepth] - 1))) ))
             fi
+
+            currentRanges[$scannerDepth]=$pos
         done
     done
 
